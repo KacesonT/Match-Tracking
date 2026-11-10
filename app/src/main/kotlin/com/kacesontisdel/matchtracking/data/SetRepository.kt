@@ -45,6 +45,45 @@ class SetRepository(private val dao: SetDao) {
   fun stats(byStage: Boolean, byOpponent: Boolean, myCharacterId: String?, opponentCharacterId: String?) =
     dao.stats(byStage, byOpponent, myCharacterId, opponentCharacterId)
 
+  /** Every saved set with its games, as pretty-printed JSON. */
+  suspend fun exportJson(): String {
+    val gamesBySet = dao.allGames().groupBy { it.setId }
+    val sets = dao.allSets().map { s ->
+      BackupSet(
+        id = s.id,
+        dateMillis = s.dateMillis,
+        format = s.format,
+        opponentName = s.opponentName,
+        games = gamesBySet[s.id].orEmpty().map {
+          BackupGame(it.gameNumber, it.stageId, it.myCharacterId, it.opponentCharacterId, it.won)
+        },
+      )
+    }
+    return backupJson.encodeToString(BackupFile(sets = sets))
+  }
+
+  /**
+   * Adds sets whose id isn't in the database yet. Everything is validated before anything is saved,
+   * so a bad file throws and changes nothing.
+   */
+  suspend fun importJson(text: String): ImportResult {
+    val file = backupJson.decodeFromString<BackupFile>(text)
+    require(file.version == 1) { "Unsupported backup version ${file.version}" }
+    val known = dao.existingSetIds().toMutableSet()
+    var skipped = 0
+    val toAdd = file.sets.mapNotNull { s ->
+      // add() returns false if the id was already there (in the database or earlier in this file).
+      if (known.add(s.id)) {
+        s.toGameSet()
+      } else {
+        skipped++
+        null
+      }
+    }
+    toAdd.forEach { saveSet(it) }
+    return ImportResult(added = toAdd.size, skipped = skipped)
+  }
+
   suspend fun setCount(): Int = dao.setCount()
   suspend fun gameCount(): Int = dao.gameCount()
 }

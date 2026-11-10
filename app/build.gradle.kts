@@ -84,6 +84,9 @@ dependencies {
   implementation(libs.androidx.room.ktx)
   ksp(libs.androidx.room.compiler)
 
+  // JSON for backup export/import
+  implementation(libs.kotlinx.serialization.json)
+
   // Navigation
   implementation(libs.androidx.navigation3.ui)
   implementation(libs.androidx.navigation3.runtime)

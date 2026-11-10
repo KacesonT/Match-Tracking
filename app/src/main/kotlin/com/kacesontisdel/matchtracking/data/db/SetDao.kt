@@ -27,6 +27,16 @@ abstract class SetDao {
   @Query("SELECT COUNT(*) FROM games")
   abstract suspend fun gameCount(): Int
 
+  // Used by backup export / import.
+  @Query("SELECT * FROM sets")
+  abstract suspend fun allSets(): List<SetEntity>
+
+  @Query("SELECT * FROM games ORDER BY setId, gameNumber")
+  abstract suspend fun allGames(): List<GameEntity>
+
+  @Query("SELECT id FROM sets")
+  abstract suspend fun existingSetIds(): List<String>
+
   /**
    * One query for all three stats tabs. A switched-off dimension comes back as '' so every row
    * collapses into one group. [myCharacterId] / [opponentCharacterId] = null means all.
