@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -31,9 +32,10 @@ import com.kacesontisdel.matchtracking.data.stageName
 import com.kacesontisdel.matchtracking.domain.GameSet
 import com.kacesontisdel.matchtracking.domain.SetFormat
 import com.kacesontisdel.matchtracking.ui.components.CharacterPicker
+import com.kacesontisdel.matchtracking.ui.components.STAGE_GRID_HEIGHT
 import com.kacesontisdel.matchtracking.ui.components.StagePicker
 
-private enum class Sheet { Stage, Mine, Opponent }
+private enum class Sheet { Mine, Opponent }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,7 +55,13 @@ fun LogSetScreen(viewModel: LogSetViewModel = viewModel(factory = LogSetViewMode
       if (set.isComplete) {
         SummarySection(set, state.saving, state.saveError, onSave = viewModel::saveSet)
       } else {
-        NextGameSection(state, onOpen = { sheet = it }, onResult = viewModel::recordGame)
+        NextGameSection(
+          state,
+          onOpen = { sheet = it },
+          onStageTap = viewModel::tapStage,
+          onToggleStageMode = viewModel::toggleStageMode,
+          onResult = viewModel::recordGame,
+        )
       }
       GameList(set)
       Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -68,7 +76,6 @@ fun LogSetScreen(viewModel: LogSetViewModel = viewModel(factory = LogSetViewMode
   sheet?.let { which ->
     ModalBottomSheet(onDismissRequest = { sheet = null }) {
       when (which) {
-        Sheet.Stage -> StagePicker(onPick = { viewModel.pickStage(it.id); sheet = null })
         Sheet.Mine -> CharacterPicker(
           recentIds = state.recentMine,
           onPick = { viewModel.pickMine(it.id); sheet = null },
@@ -114,11 +121,32 @@ private fun ScoreHeader(set: GameSet) {
 }
 
 @Composable
-private fun NextGameSection(state: LogSetUiState, onOpen: (Sheet) -> Unit, onResult: (Boolean) -> Unit) {
+private fun NextGameSection(
+  state: LogSetUiState,
+  onOpen: (Sheet) -> Unit,
+  onStageTap: (String) -> Unit,
+  onToggleStageMode: () -> Unit,
+  onResult: (Boolean) -> Unit,
+) {
   Text("Game ${(state.set?.games?.size ?: 0) + 1}", style = MaterialTheme.typography.titleMedium)
-  PickButton("Stage", state.stageId?.let(::stageName)) { onOpen(Sheet.Stage) }
   PickButton("My character", state.myCharacterId?.let(::fighterName)) { onOpen(Sheet.Mine) }
   PickButton("Opponent's character", state.opponentCharacterId?.let(::fighterName)) { onOpen(Sheet.Opponent) }
+
+  // Same ban / select flow as the Stage Bans screen; the chosen stage is what gets recorded with the game.
+  Text(
+    "Stage: ${state.stageId?.let(::stageName) ?: "not chosen"}" +
+      if (state.selectingStage) " · tap a stage to play on it" else " · tap a stage to ban it",
+  )
+  StagePicker(
+    banned = state.bannedStageIds,
+    selected = state.stageId,
+    onPick = { onStageTap(it.id) },
+    modifier = Modifier.height(STAGE_GRID_HEIGHT),
+    horizontalPadding = 0.dp, // the screen already pads its content
+  )
+  OutlinedButton(onClick = onToggleStageMode, modifier = Modifier.fillMaxWidth()) {
+    Text(if (state.selectingStage) "Mode: Select stage (tap to switch to Ban)" else "Mode: Ban stages (tap to switch to Select)")
+  }
   Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
     Button(onClick = { onResult(true) }, enabled = state.canRecordGame, modifier = Modifier.weight(1f)) {
       Text("I won")

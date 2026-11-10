@@ -18,9 +18,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.kacesontisdel.matchtracking.data.STAGES
 import com.kacesontisdel.matchtracking.data.Stage
+
+private val CELL_HEIGHT = 84.dp
+private val GAP = 8.dp
+
+/**
+ * Height that fits every stage with no inner scrolling. A lazy grid needs a bounded height, so screens
+ * that scroll as a whole pass this in as the modifier.
+ */
+val STAGE_GRID_HEIGHT: Dp = ((STAGES.size + 1) / 2).let { rows -> CELL_HEIGHT * rows + GAP * (rows - 1) }
 
 /**
  * Two-column grid of the stages in STAGES; GameIcon shows the name as text until stg_<id>.png exists.
@@ -32,17 +42,18 @@ fun StagePicker(
   modifier: Modifier = Modifier,
   banned: Set<String> = emptySet(),
   selected: String? = null,
+  horizontalPadding: Dp = 16.dp,
 ) {
   LazyVerticalGrid(
     columns = GridCells.Fixed(2),
-    verticalArrangement = Arrangement.spacedBy(8.dp),
-    horizontalArrangement = Arrangement.spacedBy(8.dp),
-    modifier = modifier.padding(horizontal = 16.dp),
+    verticalArrangement = Arrangement.spacedBy(GAP),
+    horizontalArrangement = Arrangement.spacedBy(GAP),
+    modifier = modifier.padding(horizontal = horizontalPadding),
   ) {
     items(STAGES, key = { it.id }) { stage ->
       // Box stacks its children on top of each other: the icon first, then the overlay symbol.
       Box(
-        modifier = Modifier.fillMaxWidth().height(84.dp).clickable { onPick(stage) },
+        modifier = Modifier.fillMaxWidth().height(CELL_HEIGHT).clickable { onPick(stage) },
         contentAlignment = Alignment.Center,
       ) {
         GameIcon(prefix = "stg", id = stage.id, name = stage.name, modifier = Modifier.matchParentSize())

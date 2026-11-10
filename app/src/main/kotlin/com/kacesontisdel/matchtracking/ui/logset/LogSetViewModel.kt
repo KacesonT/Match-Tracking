@@ -25,6 +25,9 @@ data class LogSetUiState(
   val set: GameSet? = null,
   // Picks for the NEXT game
   val stageId: String? = null,
+  // Stage banning for the next game: banned stages get a red X; selectingStage = false means taps ban.
+  val bannedStageIds: Set<String> = emptySet(),
+  val selectingStage: Boolean = false,
   val myCharacterId: String? = null,
   val opponentCharacterId: String? = null,
   // shortcut: recents live in memory only (reset on app restart); persist or derive from the DB later.
@@ -53,33 +56,63 @@ class LogSetViewModel(private val repository: SetRepository) : ViewModel() {
         opponentName = it.opponentName.trim().ifEmpty { null },
       ),
       stageId = null,
+      bannedStageIds = emptySet(),
+      selectingStage = false,
       opponentCharacterId = null,
       justSaved = false,
       saveError = null,
     )
   }
 
-  fun pickStage(id: String) = _state.update { it.copy(stageId = id) }
+  fun toggleStageMode() = _state.update { it.copy(selectingStage = !it.selectingStage) }
+
+  /** In select mode a tap chooses the stage (tap again to clear; banned stages can't be chosen). In ban mode it toggles the ban. */
+  fun tapStage(id: String) = _state.update { s ->
+    if (s.selectingStage) {
+      if (id in s.bannedStageIds) s else s.copy(stageId = if (s.stageId == id) null else id)
+    } else {
+      val banned = if (id in s.bannedStageIds) s.bannedStageIds - id else s.bannedStageIds + id
+      // Banning the chosen stage un-chooses it.
+      s.copy(bannedStageIds = banned, stageId = if (s.stageId == id) null else s.stageId)
+    }
+  }
 
   fun pickMine(id: String) = _state.update { it.copy(myCharacterId = id, recentMine = it.recentMine.withRecent(id)) }
 
   fun pickOpponent(id: String) =
     _state.update { it.copy(opponentCharacterId = id, recentOpponent = it.recentOpponent.withRecent(id)) }
 
-  /** Adds the game. Stage and both characters stay selected, so the next game starts with the same picks. */
+  /**
+   * Adds the game. Stage and both characters stay selected, so the next game starts with the same picks;
+   * the bans are cleared because each game has its own ban phase.
+   */
   fun recordGame(won: Boolean) = _state.update { s ->
     val set = s.set
     if (!s.canRecordGame || set == null) {
       s
     } else {
-      s.copy(set = set.addGame(s.stageId!!, s.myCharacterId!!, s.opponentCharacterId!!, won), saveError = null)
+      s.copy(
+        set = set.addGame(s.stageId!!, s.myCharacterId!!, s.opponentCharacterId!!, won),
+        bannedStageIds = emptySet(),
+        selectingStage = false,
+        saveError = null,
+      )
     }
   }
 
   fun undoLastGame() = _state.update { it.copy(set = it.set?.undoLastGame(), saveError = null) }
 
   /** Abandons the set in progress without saving. */
-  fun discardSet() = _state.update { it.copy(set = null, stageId = null, opponentCharacterId = null, saveError = null) }
+  fun discardSet() = _state.update {
+    it.copy(
+      set = null,
+      stageId = null,
+      bannedStageIds = emptySet(),
+      selectingStage = false,
+      opponentCharacterId = null,
+      saveError = null,
+    )
+  }
 
   fun saveSet() {
     val s = _state.value
