@@ -25,6 +25,9 @@ import androidx.compose.ui.unit.dp
 import com.kacesontisdel.matchtracking.data.FIGHTERS
 import com.kacesontisdel.matchtracking.data.Fighter
 
+// Always listed first, in this order; everyone else follows in roster order.
+private val PINNED_IDS = listOf("ice_climbers_popo", "rob", "steve", "min_min")
+
 /**
  * Searchable icon grid. [recentIds] (most recent first) are pinned at the top while the search box is empty.
  * The picker doesn't remember anything itself; the caller owns the recents and updates them in [onPick].
@@ -32,7 +35,12 @@ import com.kacesontisdel.matchtracking.data.Fighter
 @Composable
 fun CharacterPicker(recentIds: List<String>, onPick: (Fighter) -> Unit, modifier: Modifier = Modifier) {
   var query by remember { mutableStateOf("") }
-  val matches = remember(query) { FIGHTERS.filter { it.name.contains(query.trim(), ignoreCase = true) } }
+  // sortedBy is stable: unpinned fighters all get the same key, so they keep their roster order.
+  val matches =
+    remember(query) {
+      FIGHTERS.filter { it.name.contains(query.trim(), ignoreCase = true) }
+        .sortedBy { PINNED_IDS.indexOf(it.id).takeIf { i -> i >= 0 } ?: PINNED_IDS.size }
+    }
   val recents = remember(recentIds) { recentIds.mapNotNull { id -> FIGHTERS.firstOrNull { it.id == id } } }
 
   Column(modifier = modifier.fillMaxSize().padding(horizontal = 16.dp)) {
