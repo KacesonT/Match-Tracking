@@ -23,7 +23,7 @@ import com.kacesontisdel.matchtracking.data.STAGES
 import com.kacesontisdel.matchtracking.data.Stage
 
 /**
- * Two-column grid of the 9 stages; GameIcon shows the name as text until stg_<id>.png exists.
+ * Two-column grid of the stages in STAGES; GameIcon shows the name as text until stg_<id>.png exists.
  * Banned stages get a red X on top, the [selected] stage gets a green check.
  */
 @Composable

@@ -22,7 +22,7 @@ val FIGHTERS: List<Fighter> = listOf(
   Fighter("peach", "Peach"),
   Fighter("daisy", "Daisy"),
   Fighter("bowser", "Bowser"),
-  Fighter("ice_climbers", "Ice Climbers"),
+  Fighter("ice_climbers_popo", "Ice Climbers"), // icon files are named after the two climbers
   Fighter("sheik", "Sheik"),
   Fighter("zelda", "Zelda"),
   Fighter("dr_mario", "Dr. Mario"),
@@ -35,7 +35,7 @@ val FIGHTERS: List<Fighter> = listOf(
   Fighter("mewtwo", "Mewtwo"),
   Fighter("roy", "Roy"),
   Fighter("chrom", "Chrom"),
-  Fighter("game_and_watch", "Mr. Game & Watch"),
+  Fighter("mr_game_and_watch", "Mr. Game & Watch"),
   Fighter("meta_knight", "Meta Knight"),
   Fighter("pit", "Pit"),
   Fighter("dark_pit", "Dark Pit"),
@@ -56,7 +56,7 @@ val FIGHTERS: List<Fighter> = listOf(
   Fighter("villager", "Villager"),
   Fighter("mega_man", "Mega Man"),
   Fighter("wii_fit_trainer", "Wii Fit Trainer"),
-  Fighter("rosalina_and_luma", "Rosalina & Luma"),
+  Fighter("rosalina", "Rosalina & Luma"),
   Fighter("little_mac", "Little Mac"),
   Fighter("greninja", "Greninja"),
   Fighter("mii_brawler", "Mii Brawler"),
@@ -84,7 +84,7 @@ val FIGHTERS: List<Fighter> = listOf(
   Fighter("piranha_plant", "Piranha Plant"),
   Fighter("joker", "Joker"),
   Fighter("hero", "Hero"),
-  Fighter("banjo_and_kazooie", "Banjo & Kazooie"),
+  Fighter("banjo_kazooie", "Banjo & Kazooie"),
   Fighter("terry", "Terry"),
   Fighter("byleth", "Byleth"),
   Fighter("min_min", "Min Min"),
@@ -104,7 +104,6 @@ val STAGES: List<Stage> = listOf(
   Stage("town_and_city", "Town and City"),
   Stage("kalos_pokemon_league", "Kalos Pokémon League"),
   Stage("hollow_bastion", "Hollow Bastion"),
-  Stage("yoshis_story", "Yoshi's Story"),
 )
 
 private val fightersById = FIGHTERS.associateBy { it.id }
