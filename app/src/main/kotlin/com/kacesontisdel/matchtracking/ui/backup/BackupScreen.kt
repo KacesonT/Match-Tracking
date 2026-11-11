@@ -31,7 +31,7 @@ fun BackupScreen(viewModel: BackupViewModel = viewModel(factory = BackupViewMode
 
   Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
     Text("Export saves all your sets to a JSON file. Import adds only sets you don't already have.")
-    Button(onClick = { exportLauncher.launch("match-tracking-backup.json") }, modifier = Modifier.fillMaxWidth()) {
+    Button(onClick = { exportLauncher.launch("data-tracker-backup.json") }, modifier = Modifier.fillMaxWidth()) {
       Text("Export to file")
     }
     OutlinedButton(onClick = { importLauncher.launch(arrayOf("*/*")) }, modifier = Modifier.fillMaxWidth()) {
