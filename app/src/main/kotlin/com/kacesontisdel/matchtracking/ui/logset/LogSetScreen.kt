@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -32,7 +31,7 @@ import com.kacesontisdel.matchtracking.data.stageName
 import com.kacesontisdel.matchtracking.domain.GameSet
 import com.kacesontisdel.matchtracking.domain.SetFormat
 import com.kacesontisdel.matchtracking.ui.components.CharacterPicker
-import com.kacesontisdel.matchtracking.ui.components.STAGE_GRID_HEIGHT
+import com.kacesontisdel.matchtracking.ui.components.StageModeButton
 import com.kacesontisdel.matchtracking.ui.components.StagePicker
 
 private enum class Sheet { Mine, Opponent }
@@ -141,12 +140,9 @@ private fun NextGameSection(
     banned = state.bannedStageIds,
     selected = state.stageId,
     onPick = { onStageTap(it.id) },
-    modifier = Modifier.height(STAGE_GRID_HEIGHT),
     horizontalPadding = 0.dp, // the screen already pads its content
   )
-  OutlinedButton(onClick = onToggleStageMode, modifier = Modifier.fillMaxWidth()) {
-    Text(if (state.selectingStage) "Mode: Select stage (tap to switch to Ban)" else "Mode: Ban stages (tap to switch to Select)")
-  }
+  StageModeButton(state.selectingStage, onToggle = onToggleStageMode, modifier = Modifier.fillMaxWidth())
   Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
     Button(onClick = { onResult(true) }, enabled = state.canRecordGame, modifier = Modifier.weight(1f)) {
       Text("I won")

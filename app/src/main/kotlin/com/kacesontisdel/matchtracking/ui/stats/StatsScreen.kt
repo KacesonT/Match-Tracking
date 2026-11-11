@@ -4,6 +4,10 @@ import android.content.pm.ApplicationInfo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -24,8 +28,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -35,6 +42,8 @@ import com.kacesontisdel.matchtracking.data.db.StatRow
 import com.kacesontisdel.matchtracking.data.fighterName
 import com.kacesontisdel.matchtracking.data.stageName
 import com.kacesontisdel.matchtracking.ui.components.CharacterPicker
+import com.kacesontisdel.matchtracking.ui.components.GameIcon
+import com.kacesontisdel.matchtracking.ui.components.STAGE_ASPECT
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
@@ -111,13 +120,32 @@ private fun StatRowItem(row: StatRow, tab: StatsTab) {
     StatsTab.StageVsCharacter -> "${stageName(row.stageId)} · vs ${fighterName(row.opponentCharacterId)}"
   }
   val winPct = (row.gamesWon * 100f / row.gamesPlayed).roundToInt()
-  Column(modifier = Modifier.fillMaxWidth().alpha(if (row.gamesPlayed < MIN_GAMES) 0.5f else 1f)) {
-    Text(label, style = MaterialTheme.typography.titleMedium)
-    Text("Games ${row.gamesWon}–${row.gamesPlayed - row.gamesWon} ($winPct%)")
-    Text(
-      "Sets ${row.setsWon}–${row.setsPlayed - row.setsWon}",
-      style = MaterialTheme.typography.bodySmall,
-    )
+  Row(
+    modifier = Modifier.fillMaxWidth().alpha(if (row.gamesPlayed < MIN_GAMES) 0.5f else 1f),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.spacedBy(12.dp),
+  ) {
+    // The tab says which ids are filled in (the other is ""), so only those pictures are shown.
+    if (tab.byStage) {
+      GameIcon(
+        prefix = "stg",
+        id = row.stageId,
+        name = stageName(row.stageId),
+        modifier = Modifier.width(72.dp).aspectRatio(STAGE_ASPECT).clip(RoundedCornerShape(8.dp)),
+        contentScale = ContentScale.Crop,
+      )
+    }
+    if (tab.byOpponent) {
+      GameIcon(prefix = "chr", id = row.opponentCharacterId, name = fighterName(row.opponentCharacterId), modifier = Modifier.size(48.dp))
+    }
+    Column {
+      Text(label, style = MaterialTheme.typography.titleMedium)
+      Text("Games ${row.gamesWon}–${row.gamesPlayed - row.gamesWon} ($winPct%)")
+      Text(
+        "Sets ${row.setsWon}–${row.setsPlayed - row.setsWon}",
+        style = MaterialTheme.typography.bodySmall,
+      )
+    }
   }
 }
 
