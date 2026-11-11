@@ -28,7 +28,7 @@ Phone only, portrait, dark theme. Everything is stored on the device; there is n
 
 ## Installing the APK
 
-1. Get `app-debug.apk` onto your phone: download it, upload it to Google Drive, email it to yourself, or copy it over USB.
+1. Get `app-debug.apk` 
 2. Open the file on the phone. Android will ask you to allow that app (Files, Drive, Gmail…) to **install unknown apps**. Allow it.
 3. Tap **Install**, then **Open**.
 
